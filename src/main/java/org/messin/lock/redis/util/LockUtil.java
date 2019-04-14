@@ -9,6 +9,10 @@ import java.net.UnknownHostException;
 
 public final class LockUtil {
 
+    /**
+     * Generate the lock information.
+     * The information is combined by host, process id and thread id.
+     */
     public static String getLockValueInfo() {
         long threadId = Thread.currentThread().getId();
         int processId = getProcessId();

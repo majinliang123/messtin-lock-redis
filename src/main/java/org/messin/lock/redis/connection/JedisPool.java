@@ -8,24 +8,27 @@ import org.messin.lock.redis.util.ConfigUtil;
 import redis.clients.jedis.Jedis;
 
 /**
- * Create jedis instance use double check lock.
+ * Create jedis instance.
  */
-public final class JedisSingleton {
-    private static final Logger logger = LogManager.getLogger(JedisSingleton.class);
+public final class JedisPool {
+    private static final Logger logger = LogManager.getLogger(JedisPool.class);
 
     private static volatile Jedis INSTANCE;
 
-    public static Jedis newInstance() {
-        if (INSTANCE == null) {
-            synchronized (JedisSingleton.class) {
-                if (INSTANCE == null) {
-                    INSTANCE = createInstance();
-                }
-            }
+    public static void init() {
+        try {
+            ConfigUtil.loadConfig();
+        } catch (Exception e) {
+            throw new MesstinLockRedisException(e);
         }
-        return INSTANCE;
     }
 
+    /**
+     * Create instance of {@link Jedis}
+     * <p>
+     * If {@code createNew } is false, will use the jedis instance already cached.
+     * If {@code createNew } is true, will create a new jedis instance and return.
+     */
     public static Jedis newInstance(boolean createNew) {
         if (createNew) {
             return createInstance();
@@ -34,11 +37,20 @@ public final class JedisSingleton {
         }
     }
 
+    private static Jedis newInstance() {
+        if (INSTANCE == null) {
+            synchronized (JedisPool.class) {
+                if (INSTANCE == null) {
+                    INSTANCE = createInstance();
+                }
+            }
+        }
+        return INSTANCE;
+    }
+
     private static Jedis createInstance() {
         try {
             logger.info("Creating instance for Jedis.");
-            ConfigUtil.loadConfig();
-
             if (Config.REDIS_SERVER_HOST != null && Config.REDIS_SERVER_PORT != null) {
                 return new Jedis(Config.REDIS_SERVER_HOST, Integer.parseInt(Config.REDIS_SERVER_PORT));
             } else if (Config.REDIS_SERVER_HOST != null) {

@@ -6,9 +6,23 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+/**
+ * The container which hold the status of locks.
+ * <p>
+ * {@link #waitingContainer} contains the information of thread which is wait for the lock.
+ * {@link #lockingContainer} contains the information about which thread has get the lock.
+ */
 public final class LockStatusPool {
 
+    /**
+     * key -> queue of {@link LockStatus}
+     * We use {@link Queue} here because we could pop the first thread which is waiting for the key.
+     */
     private final static Map<String, Queue<LockStatus>> waitingContainer = new ConcurrentHashMap<>();
+
+    /**
+     * key -> thread information.
+     */
     private final static Map<String, String> lockingContainer = new ConcurrentHashMap<>();
 
     public static LockStatus putIntoWaitingContainer(String key, String value) {
@@ -27,9 +41,9 @@ public final class LockStatusPool {
         return lockStatus;
     }
 
-    public static synchronized LockStatus popFromWaitingContainer(String key) {
+    public static synchronized LockStatus peakFromWaitingContainer(String key) {
         if (waitingContainer.containsKey(key)) {
-            return waitingContainer.get(key).poll();
+            return waitingContainer.get(key).peek();
         }
         return null;
     }
@@ -43,14 +57,14 @@ public final class LockStatusPool {
     }
 
     public static void removeFromLockingContainer(String key) {
-        String removedValue = lockingContainer.remove(key);
+        lockingContainer.remove(key);
     }
 
-    public static Set<String> getAllLockingLock(){
+    public static Set<String> getAllLockingLock() {
         return lockingContainer.keySet();
     }
 
-    public static void init(){
+    public static void init() {
         Runtime.getRuntime().addShutdownHook(new Thread(new ReleaseLockWhenShutDown()));
     }
 }

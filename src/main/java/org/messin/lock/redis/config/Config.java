@@ -11,7 +11,7 @@ package org.messin.lock.redis.config;
  * REDIS_SERVER_HOST=192.168.1.6
  * REDIS_SERVER_PORT=6379
  * <p>
- * But there are some properties is {@code final}, we could not set it at redis-lock.property any more.
+ * But there are some properties is {@code final }, we could not set it at redis-lock.property any more.
  * Their value is constant.
  */
 public final class Config {

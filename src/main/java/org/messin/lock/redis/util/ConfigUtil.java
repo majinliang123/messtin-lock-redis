@@ -13,7 +13,7 @@ import java.net.URISyntaxException;
 import java.util.Properties;
 
 /**
- * Load config from redis-lock.property to
+ * Load config from redis-lock.property to {@link Config}
  */
 public final class ConfigUtil {
 
